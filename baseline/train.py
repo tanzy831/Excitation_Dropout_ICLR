@@ -27,15 +27,18 @@ class LossLogger(Callback):
 
 # Build torch model
 model = nn.Sequential(
-    nn.Conv2d(in_channels=3, out_channels=96, kernel_size=5, padding=1, stride=1),
+    nn.Conv2d(in_channels=3, out_channels=96,
+              kernel_size=5, padding=1, stride=1),
     nn.ReLU(),
     nn.MaxPool2d(kernel_size=3, padding=0, stride=2),
 
-    nn.Conv2d(in_channels=96, out_channels=128, kernel_size=5, padding=2, stride=1),
+    nn.Conv2d(in_channels=96, out_channels=128,
+              kernel_size=5, padding=2, stride=1),
     nn.ReLU(),
     nn.MaxPool2d(kernel_size=3, padding=0, stride=2),
 
-    nn.Conv2d(in_channels=128, out_channels=256, kernel_size=5, padding=2, stride=1),
+    nn.Conv2d(in_channels=128, out_channels=256,
+              kernel_size=5, padding=2, stride=1),
     nn.ReLU(),
     nn.MaxPool2d(kernel_size=3, padding=0, stride=2),
 
@@ -74,7 +77,7 @@ trainer \
     .bind_loader('validate', validate_loader)
 
 if USE_CUDA:
-  trainer.cuda()
+    trainer.cuda()
 
 # Go!
 trainer.fit()
