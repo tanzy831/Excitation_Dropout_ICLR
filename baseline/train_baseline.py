@@ -5,12 +5,23 @@ from inferno.io.box.cifar10 import get_cifar10_loaders
 from model import *
 from tqdm import tqdm
 import timeit
+import time
+from pathlib import Path
 
 DATASET_DIRECTORY = 'data'
+MODEL_SAVE_DIRECTORY = 'models'
 DOWNLOAD_CIFAR = True
 EPOCH = 100
 BATCH_SIZE = 100
 VALID_BATCH_SIZE = 100
+
+model_save_path = Path('./' + MODEL_SAVE_DIRECTORY)
+if not (model_save_path.exists() and model_save_path.is_dir()):
+    model_save_path.mkdir()
+
+# create directory for this run
+run_directory_path = model_save_path / str(time.time()).replace('.', '')
+run_directory_path.mkdir()
 
 train_loader, validate_loader = get_cifar10_loaders(
     DATASET_DIRECTORY, train_batch_size=BATCH_SIZE, test_batch_size=VALID_BATCH_SIZE, download=DOWNLOAD_CIFAR)
@@ -47,5 +58,16 @@ for e in range(EPOCH):
         result = output.max(1)[1]
         correct += label.eq(result).sum()
     correct = correct.float().cpu()
-    print('Epoch training time: ', e_end - e_start, ', loss per sample: ', epoch_loss /
-          (batch_idx * BATCH_SIZE), ', Accuracy: ', correct / (len(validate_loader) * VALID_BATCH_SIZE))
+
+    # save model
+    torch.save(model.state_dict(), str(run_directory_path) +
+               '/' + 'epoch_' + str(e + 1) + '.pt')
+    log_str = 'Epoch {e}, Epoch training time: {train_time}, loss per sample: {LPS}, Accuracy: {acc}'.format(
+        e=(e + 1),
+        train_time=(e_end - e_start),
+        LPS=(epoch_loss / (batch_idx * BATCH_SIZE)),
+        acc=(correct / (len(validate_loader) * VALID_BATCH_SIZE)))
+
+    with open(str(run_directory_path) + '/train_log.txt', 'a') as f:
+        f.write(log_str + '\n')
+    print(log_str)
