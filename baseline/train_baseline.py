@@ -16,6 +16,7 @@ DOWNLOAD_CIFAR = True
 EPOCH = 300
 BATCH_SIZE = 100
 VALID_BATCH_SIZE = 100
+model = CNN_2_model_standard_dropout
 
 model_save_path = Path('./' + MODEL_SAVE_DIRECTORY)
 if not (model_save_path.exists() and model_save_path.is_dir()):
@@ -32,7 +33,6 @@ train_loader, validate_loader = get_cifar10_loaders(
     DATASET_DIRECTORY, train_batch_size=BATCH_SIZE, test_batch_size=VALID_BATCH_SIZE, download=DOWNLOAD_CIFAR)
 
 device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
-model = CNN_2_model
 model = model.to(device)
 
 ADAMOptimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
