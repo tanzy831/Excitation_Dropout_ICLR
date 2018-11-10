@@ -1,15 +1,16 @@
 import torch.nn as nn
-from inferno.io.box.cifar import get_cifar10_loaders
+from inferno.io.box.cifar10 import get_cifar10_loaders
 from inferno.trainers.basic import Trainer
 from inferno.trainers.callbacks.logging.tensorboard import TensorboardLogger
 from inferno.extensions.layers.reshape import Flatten
+import torch
 
 # Fill these in:
 LOG_DIRECTORY = 'logs'
 SAVE_DIRECTORY = 'models'
 DATASET_DIRECTORY = 'data'
 DOWNLOAD_CIFAR = True
-USE_CUDA = True
+USE_CUDA = torch.cuda.is_available()
 
 # Build torch model
 model = nn.Sequential(
