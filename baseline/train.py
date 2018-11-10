@@ -14,15 +14,18 @@ USE_CUDA = torch.cuda.is_available()
 
 # Build torch model
 model = nn.Sequential(
-    nn.Conv2d(in_channels=3, out_channels=96, kernel_size=5, padding=1, stride=1),
+    nn.Conv2d(in_channels=3, out_channels=96,
+              kernel_size=5, padding=1, stride=1),
     nn.ReLU(),
     nn.MaxPool2d(kernel_size=3, padding=0, stride=2),
 
-    nn.Conv2d(in_channels=96, out_channels=128, kernel_size=5, padding=2, stride=1),
+    nn.Conv2d(in_channels=96, out_channels=128,
+              kernel_size=5, padding=2, stride=1),
     nn.ReLU(),
     nn.MaxPool2d(kernel_size=3, padding=0, stride=2),
 
-    nn.Conv2d(in_channels=128, out_channels=256, kernel_size=5, padding=2, stride=1),
+    nn.Conv2d(in_channels=128, out_channels=256,
+              kernel_size=5, padding=2, stride=1),
     nn.ReLU(),
     nn.MaxPool2d(kernel_size=3, padding=0, stride=2),
 
@@ -41,16 +44,16 @@ train_loader, validate_loader = get_cifar10_loaders(DATASET_DIRECTORY,
 
 # Build trainer
 trainer = Trainer(model) \
-  .build_criterion('CrossEntropyLoss') \
-  .build_metric('CategoricalError') \
-  .build_optimizer('Adam') \
-  .validate_every((2, 'epochs')) \
-  .save_every((5, 'epochs')) \
-  .save_to_directory(SAVE_DIRECTORY) \
-  .set_max_num_epochs(10) \
-  .build_logger(TensorboardLogger(log_scalars_every=(1, 'iteration'),
-                                  log_images_every='never'),
-                log_directory=LOG_DIRECTORY)
+    .build_criterion('CrossEntropyLoss') \
+    .build_metric('CategoricalError') \
+    .build_optimizer('Adam') \
+    .validate_every((2, 'epochs')) \
+    .save_every((5, 'epochs')) \
+    .save_to_directory(SAVE_DIRECTORY) \
+    .set_max_num_epochs(10) \
+    .build_logger(TensorboardLogger(log_scalars_every=(1, 'iteration'),
+                                    log_images_every='never'),
+                  log_directory=LOG_DIRECTORY)
 
 # Bind loaders
 trainer \
@@ -58,7 +61,7 @@ trainer \
     .bind_loader('validate', validate_loader)
 
 if USE_CUDA:
-  trainer.cuda()
+    trainer.cuda()
 
 # Go!
 trainer.fit()
