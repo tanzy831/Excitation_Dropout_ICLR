@@ -13,7 +13,7 @@ DATASET_DIRECTORY = 'data'
 MODEL_SAVE_DIRECTORY = 'models'
 LOGGER_SAVE_DIRECTORY = './logs'
 DOWNLOAD_CIFAR = True
-EPOCH = 100
+EPOCH = 300
 BATCH_SIZE = 100
 VALID_BATCH_SIZE = 100
 
@@ -44,6 +44,8 @@ for e in range(EPOCH):
     e_start = timeit.default_timer()
     batch_idx = 0
     for data, label in tqdm(train_loader, total=len(train_loader)):
+        if iterations == 25000:
+            ADAMOptimizer = torch.optim.Adam(model.parameters(), lr=1e-4)
         torch.cuda.empty_cache()
         data, label = data.to(device).float(), label.to(device).long()
         ADAMOptimizer.zero_grad()
