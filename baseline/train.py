@@ -2,27 +2,36 @@ import torch.nn as nn
 from inferno.io.box.cifar import get_cifar10_loaders
 from inferno.trainers.basic import Trainer
 from inferno.trainers.callbacks.logging.tensorboard import TensorboardLogger
-from inferno.extensions.layers.convolutional import ConvELU2D
 from inferno.extensions.layers.reshape import Flatten
 
 # Fill these in:
-LOG_DIRECTORY = '...'
-SAVE_DIRECTORY = '...'
-DATASET_DIRECTORY = '...'
+LOG_DIRECTORY = 'logs'
+SAVE_DIRECTORY = 'models'
+DATASET_DIRECTORY = 'data'
 DOWNLOAD_CIFAR = True
 USE_CUDA = True
 
 # Build torch model
 model = nn.Sequential(
-    ConvELU2D(in_channels=3, out_channels=256, kernel_size=3),
-    nn.MaxPool2d(kernel_size=2, stride=2),
-    ConvELU2D(in_channels=256, out_channels=256, kernel_size=3),
-    nn.MaxPool2d(kernel_size=2, stride=2),
-    ConvELU2D(in_channels=256, out_channels=256, kernel_size=3),
-    nn.MaxPool2d(kernel_size=2, stride=2),
+    nn.Conv2d(in_channels=3, out_channels=96, kernel_size=5, padding=1, stride=1),
+    nn.ReLU(),
+    nn.MaxPool2d(kernel_size=3, padding=0, stride=2),
+
+    nn.Conv2d(in_channels=96, out_channels=128, kernel_size=5, padding=2, stride=1),
+    nn.ReLU(),
+    nn.MaxPool2d(kernel_size=3, padding=0, stride=2),
+
+    nn.Conv2d(in_channels=128, out_channels=256, kernel_size=5, padding=2, stride=1),
+    nn.ReLU(),
+    nn.MaxPool2d(kernel_size=3, padding=0, stride=2),
+
     Flatten(),
-    nn.Linear(in_features=(256 * 4 * 4), out_features=10),
-    nn.Softmax()
+    nn.Linear(in_features=1024, out_features=2048),
+    nn.ReLU(),
+    nn.Linear(in_features=2048, out_features=2048),
+    nn.ReLU(),
+    nn.Linear(in_features=2048, out_features=10),
+    nn.Softmax(),
 )
 
 # Load loaders
