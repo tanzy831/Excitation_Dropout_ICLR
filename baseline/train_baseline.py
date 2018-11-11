@@ -53,7 +53,7 @@ for e in range(EPOCH):
         loss = criterion(output, label)
         l = loss.item()
         loss.backward()
-        ADAMOptimizer.step()
+        Optimizer.step()
         epoch_loss += l
         batch_idx += 1
         iterations += 1
