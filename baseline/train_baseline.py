@@ -16,7 +16,7 @@ DOWNLOAD_CIFAR = True
 EPOCH = 300
 BATCH_SIZE = 100
 VALID_BATCH_SIZE = 100
-model = CNN_2_model_standard_dropout
+model = CNN_2_model_standard_dropout_before
 
 model_save_path = Path('./' + MODEL_SAVE_DIRECTORY)
 if not (model_save_path.exists() and model_save_path.is_dir()):
