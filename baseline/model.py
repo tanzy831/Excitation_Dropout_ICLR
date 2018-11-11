@@ -58,7 +58,7 @@ CNN_2_model_standard_dropout = nn.Sequential(
     nn.Linear(in_features=1024, out_features=2048),
     nn.ReLU(),
 
-    nn.Dropout(0.5),
+    nn.Dropout(p=0.5),
 
     nn.Linear(in_features=2048, out_features=2048),
     nn.ReLU(),

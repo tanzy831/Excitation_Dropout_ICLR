@@ -16,7 +16,7 @@ DOWNLOAD_CIFAR = True
 EPOCH = 300
 BATCH_SIZE = 100
 VALID_BATCH_SIZE = 100
-model = CNN_2_model_standard_dropout
+model = CNN_2_model
 
 model_save_path = Path('./' + MODEL_SAVE_DIRECTORY)
 if not (model_save_path.exists() and model_save_path.is_dir()):
@@ -35,7 +35,7 @@ train_loader, validate_loader = get_cifar10_loaders(
 device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 model = model.to(device)
 
-ADAMOptimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
+Optimizer = torch.optim.SGD(model.parameters(), lr=1e-3)
 criterion = nn.CrossEntropyLoss()
 
 iterations = 0
@@ -45,10 +45,10 @@ for e in range(EPOCH):
     batch_idx = 0
     for data, label in tqdm(train_loader, total=len(train_loader)):
         if iterations == 25000:
-            ADAMOptimizer = torch.optim.Adam(model.parameters(), lr=1e-4)
+            Optimizer = torch.optim.SGD(model.parameters(), lr=1e-4)
         torch.cuda.empty_cache()
         data, label = data.to(device).float(), label.to(device).long()
-        ADAMOptimizer.zero_grad()
+        Optimizer.zero_grad()
         output = model(data)
         loss = criterion(output, label)
         l = loss.item()
