@@ -35,7 +35,7 @@ train_loader, validate_loader = get_cifar10_loaders(
 device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 model = model.to(device)
 
-Optimizer = torch.optim.SGD(model.parameters(), lr=1e-3)
+Optimizer = torch.optim.SGD(model.parameters(), lr=1e-3, momentum=0.9)
 criterion = nn.CrossEntropyLoss()
 
 iterations = 0
@@ -45,7 +45,8 @@ for e in range(EPOCH):
     batch_idx = 0
     for data, label in tqdm(train_loader, total=len(train_loader)):
         if iterations == 25000:
-            Optimizer = torch.optim.SGD(model.parameters(), lr=1e-4)
+            Optimizer = torch.optim.SGD(
+                model.parameters(), lr=1e-4, momentum=0.9)
         torch.cuda.empty_cache()
         data, label = data.to(device).float(), label.to(device).long()
         Optimizer.zero_grad()
