@@ -32,13 +32,15 @@ class CNN_2_EDropout(nn.Module):
         h4 = self.flatten(h3)
 
         h5 = F.relu(self.fc1(h4))
+        self.middle = h5
         h6 = F.relu(self.fc2(h5))
         h7 = self.fc3(h6)
         return h7
 
-    def forward_ed(self):
-        h1 = self.maxpool1(F.relu(self.cnn1(x)))
-        h2 = self.maxpool2(F.relu(self.cnn2(h1)))
-        h3 = self.maxpool3(F.relu(self.cnn3(h2)))
+    def forward_ed(self, mask):
+        h5_masked = torch.mul(self.middle, mask)
+        
+        h6 = F.relu(self.fc2(h5_masked))
+        h7 = self.fc3(h6)
 
-        h4 = self.flatten(h3)
+        return h7

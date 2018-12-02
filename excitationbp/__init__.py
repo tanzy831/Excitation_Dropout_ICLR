@@ -32,10 +32,10 @@ def use_eb(use_eb, verbose=True):
         if verbose: print("\t->replacing torch.nn.functional.linear with eb_linear...")
         torch.nn.functional.linear = EBLinear.apply
 
-        if verbose: print("\t->replacing torch.nn.functional.conv{1,2,3}d with eb_conv{1,2,3}d...")
-        torch.nn.functional.conv1d = eb_conv1d
-        torch.nn.functional.conv2d = eb_conv2d
-        torch.nn.functional.conv3d = eb_conv3d
+        # if verbose: print("\t->replacing torch.nn.functional.conv{1,2,3}d with eb_conv{1,2,3}d...")
+        # torch.nn.functional.conv1d = eb_conv1d
+        # torch.nn.functional.conv2d = eb_conv2d
+        # torch.nn.functional.conv3d = eb_conv3d
 
         #if verbose: print("\t->replacing torch.nn.functional.avg_pool2d with eb_avg_pool2d...")
         #torch.nn.functional.avg_pool2d = eb_avg_pool2d
@@ -49,11 +49,11 @@ def use_eb(use_eb, verbose=True):
         if verbose: print("\t->restoring torch.nn.backends.thnn.backend.Linear...")
         torch.nn.functional.linear = real_fs[0]
 
-        if verbose: print("\t->restoring torch.nn.functional.conv{1,2,3}d...")
-        torch.nn.functional.conv1d = real_fs[1]
-        torch.nn.functional.conv2d = real_fs[2]
-        torch.nn.functional.conv3d = real_fs[3]
+        # if verbose: print("\t->restoring torch.nn.functional.conv{1,2,3}d...")
+        # torch.nn.functional.conv1d = real_fs[1]
+        # torch.nn.functional.conv2d = real_fs[2]
+        # torch.nn.functional.conv3d = real_fs[3]
 
-        if verbose: print("\t->restoring torch.nn.functional.avg_pool2d...")
-        torch.nn.functional.avg_pool2d = real_fs[4]
-        torch.nn.functional.max_pool2d = real_fs[5]
+        # if verbose: print("\t->restoring torch.nn.functional.avg_pool2d...")
+        # torch.nn.functional.avg_pool2d = real_fs[4]
+        # torch.nn.functional.max_pool2d = real_fs[5]

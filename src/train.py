@@ -11,6 +11,7 @@ import time
 from pathlib import Path
 import excitationbp as eb
 from torch.autograd import Variable
+from dropout_mask import DropoutMask
 
 DATASET_DIRECTORY = 'data'
 MODEL_SAVE_DIRECTORY = 'models'
@@ -56,16 +57,23 @@ for e in range(EPOCH):
         output = model.forward(data)
 
         # start excitation backprop
-        eb.use_eb(True)
+        eb.use_eb(True, verbose=False)
 
-        prob_outputs = Variable(torch.zeros(1, 10))
-        prob_outputs.data[:, label[0]] += 1
-        print(label[0])
-        print(prob_outputs)
-        prob_inputs = eb.excitation_backprop(
-            model, data[0:1,:,:,:], prob_outputs, contrastive=False, target_layer=3)
-        print(prob_inputs)
-        exit()
+        peb_list = []
+        for i in range(BATCH_SIZE):
+            prob_outputs = Variable(torch.zeros(1, 10)).to(device)
+            prob_outputs.data[:, label[i]] += 1
+
+            prob_inputs = eb.excitation_backprop(
+                model, data[i:i + 1, :, :, :], prob_outputs, 
+                contrastive=False, target_layer=4)
+            peb_list.append(prob_inputs)
+        
+        pebs = torch.cat(peb_list, dim=0) # calc peb
+        mask = DropoutMask.mask(pebs) # calc mask
+        output = model.forward_ed(mask)
+
+        eb.use_eb(False, verbose=False)
         # end excitation backprop
 
         loss = criterion(output, label)
