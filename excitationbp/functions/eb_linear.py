@@ -32,7 +32,7 @@ class EBLinear(Function):
         grad_input = grad_weight = grad_bias = None
         if ctx.needs_input_grad[0]:
             grad_input = torch.mm(grad_output, weight)
-            grad_inp = grad_inp * input
+            grad_input *= input
         if ctx.needs_input_grad[1]:
             grad_weight = torch.mm(grad_output.t(), input)
         if bias is not None and ctx.needs_input_grad[2]:

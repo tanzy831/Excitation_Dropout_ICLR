@@ -14,7 +14,7 @@ def trainable_modules(orig, flat=None, param_only=True):
     return flat
 
 def excitation_backprop(model, inputs, prob_outputs, contrastive=False, target_layer=0):
-    inputs = Variable(inputs.data) # assure that 'inputs' is a leaf variable
+    inputs = Variable(inputs.data, requires_grad=True) # assure that 'inputs' is a leaf variable
     inputs.requires_grad = True # assure that gradients will end up on this leaf variable
     torch.use_pos_weights = True
     

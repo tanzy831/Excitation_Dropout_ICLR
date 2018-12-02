@@ -293,7 +293,6 @@ class CudnnRNN(NestedIOFunction):
 
         ### start EB-SPECIFIC CODE ###
         weight = weight.clamp(min=0) if torch.use_pos_weights else weight.clamp(max=0).abs()
-        bias = bias.clamp(min=0) if torch.use_pos_weights else bias.clamp(max=0).abs()
 
         if input.data.min() < 0:
             input.data = input.data - input.data.min()
