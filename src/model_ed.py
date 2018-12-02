@@ -3,6 +3,7 @@ import torch
 import torch.nn.functional as F
 # from ...Exictation_Dropout_ICLR.baseline.model import Flatten
 from model import Flatten
+import time
 
 
 class CNN_2_EDropout(nn.Module):
@@ -24,23 +25,26 @@ class CNN_2_EDropout(nn.Module):
         self.fc2 = nn.Linear(in_features=2048, out_features=2048)
         self.fc3 = nn.Linear(in_features=2048, out_features=10)
 
-    def forward(self, x):
-        h1 = self.maxpool1(F.relu(self.cnn1(x)))
-        h2 = self.maxpool2(F.relu(self.cnn2(h1)))
-        h3 = self.maxpool3(F.relu(self.cnn3(h2)))
+        self.middle = None
 
-        h4 = self.flatten(h3)
+    def forward(self, x, mask=None, non_eb=False):
+        if mask is None:
+            h1 = self.maxpool1(F.relu(self.cnn1(x)))
+            h2 = self.maxpool2(F.relu(self.cnn2(h1)))
+            h3 = self.maxpool3(F.relu(self.cnn3(h2)))
 
-        h5 = F.relu(self.fc1(h4))
-        self.middle = h5
+            h4 = self.flatten(h3)
+
+            h5 = F.relu(self.fc1(h4))
+            if non_eb:
+                self.middle = h5
+        else:
+            assert self.middle.shape == mask.shape
+            h5 = self.middle * mask
         h6 = F.relu(self.fc2(h5))
         h7 = self.fc3(h6)
-        return h7
 
-    def forward_ed(self, mask):
-        h5_masked = torch.mul(self.middle, mask)
-        
-        h6 = F.relu(self.fc2(h5_masked))
-        h7 = self.fc3(h6)
+        if mask is not None and non_eb:
+            self.middle = None
 
         return h7

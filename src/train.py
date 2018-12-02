@@ -54,7 +54,7 @@ for e in range(EPOCH):
         torch.cuda.empty_cache()
         data, label = data.to(device).float(), label.to(device).long()
         Optimizer.zero_grad()
-        output = model.forward(data)
+        output = model.forward(data, mask=None, non_eb=True)
 
         # start excitation backprop
         eb.use_eb(True, verbose=False)
@@ -71,7 +71,7 @@ for e in range(EPOCH):
         
         pebs = torch.cat(peb_list, dim=0) # calc peb
         mask = DropoutMask.mask(pebs) # calc mask
-        output = model.forward_ed(mask)
+        output = model.forward(data, mask, non_eb=True)
 
         eb.use_eb(False, verbose=False)
         # end excitation backprop
