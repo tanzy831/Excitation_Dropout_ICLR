@@ -2,7 +2,9 @@
 .idea
 .DS_Store
 *.pyc
-baseline/__pycache__
-baseline/data
-baseline/test.py
-baseline/logs
+src/__pycache__
+src/data
+src/test.py
+src/logs
+dist
+excitationbp.egg-info

@@ -1,13 +1,16 @@
 import torch
-import torch.nn
+import torch.nn as nn
 import numpy as np
 from inferno.io.box.cifar10 import get_cifar10_loaders
 from model import *
+from model_ed import *
 from logger import Logger
 from tqdm import tqdm
 import timeit
 import time
 from pathlib import Path
+import excitationbp as eb
+from torch.autograd import Variable
 
 DATASET_DIRECTORY = 'data'
 MODEL_SAVE_DIRECTORY = 'models'
@@ -16,7 +19,7 @@ DOWNLOAD_CIFAR = True
 EPOCH = 300
 BATCH_SIZE = 100
 VALID_BATCH_SIZE = 100
-model = CNN_2_model
+model = CNN_2_EDropout()
 
 model_save_path = Path('./' + MODEL_SAVE_DIRECTORY)
 if not (model_save_path.exists() and model_save_path.is_dir()):
@@ -50,7 +53,21 @@ for e in range(EPOCH):
         torch.cuda.empty_cache()
         data, label = data.to(device).float(), label.to(device).long()
         Optimizer.zero_grad()
-        output = model(data)
+        output = model.forward(data)
+
+        # start excitation backprop
+        eb.use_eb(True)
+
+        prob_outputs = Variable(torch.zeros(1, 10))
+        prob_outputs.data[:, label[0]] += 1
+        print(label[0])
+        print(prob_outputs)
+        prob_inputs = eb.excitation_backprop(
+            model, data[0:1,:,:,:], prob_outputs, contrastive=False, target_layer=3)
+        print(prob_inputs)
+        exit()
+        # end excitation backprop
+
         loss = criterion(output, label)
         l = loss.item()
         loss.backward()
