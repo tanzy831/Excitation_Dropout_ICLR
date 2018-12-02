@@ -8,3 +8,8 @@ src/test.py
 src/logs
 dist
 excitationbp.egg-info
+baseline/data/
+baseline/logs/
+.ipynb_checkpoints/
+data/
+figures/
