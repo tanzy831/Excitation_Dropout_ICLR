@@ -37,11 +37,11 @@ def use_eb(use_eb, verbose=True):
         torch.nn.functional.conv2d = eb_conv2d
         torch.nn.functional.conv3d = eb_conv3d
 
-        if verbose: print("\t->replacing torch.nn.functional.avg_pool2d with eb_avg_pool2d...")
-        torch.nn.functional.avg_pool2d = eb_avg_pool2d
+        #if verbose: print("\t->replacing torch.nn.functional.avg_pool2d with eb_avg_pool2d...")
+        #torch.nn.functional.avg_pool2d = eb_avg_pool2d
 
-        if verbose: print("\t->replacing torch.nn.functional.avg_pool2d with eb_max_pool2d...")
-        torch.nn.functional.max_pool2d = eb_max_pool2d
+        #if verbose: print("\t->replacing torch.nn.functional.avg_pool2d with eb_max_pool2d...")
+        #torch.nn.functional.max_pool2d = eb_max_pool2d
 
     else:
         if verbose: print("using regular backprop autograd mode:")

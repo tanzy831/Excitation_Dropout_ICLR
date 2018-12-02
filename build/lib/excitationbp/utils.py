@@ -43,10 +43,12 @@ def excitation_backprop(model, inputs, prob_outputs, contrastive=False, target_l
         outputs = model(inputs)
         return torch.autograd.grad(top_h_, target_h_, grad_outputs=prob_outputs)[0]
     
-    pos_evidence = torch.autograd.grad(top_h_, contr_h_, grad_outputs=prob_outputs.clone())[0]
-    torch.use_pos_weights = False
-    neg_evidence = torch.autograd.grad(top_h_, contr_h_, grad_outputs=prob_outputs.clone())[0]
-    
-    torch.use_pos_weights = True
-    contrastive_signal = pos_evidence - neg_evidence
-    return torch.autograd.grad(contr_h_, target_h_, grad_outputs=contrastive_signal)[0]
+    outputs = model(inputs)
+    return torch.autograd.grad(top_h_, target_h_, grad_outputs=prob_outputs)[0]
+    #pos_evidence = torch.autograd.grad(top_h_, contr_h_, grad_outputs=prob_outputs.clone())[0]
+    #torch.use_pos_weights = False
+    #neg_evidence = torch.autograd.grad(top_h_, contr_h_, grad_outputs=prob_outputs.clone())[0]
+    #
+    #torch.use_pos_weights = True
+    #contrastive_signal = pos_evidence - neg_evidence
+    #return torch.autograd.grad(contr_h_, target_h_, grad_outputs=contrastive_signal)[0]
