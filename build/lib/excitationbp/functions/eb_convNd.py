@@ -259,7 +259,7 @@ def parse_arguments(self, arguments, buffers, kernel_size):
 
 def make_update_output(fn):
     def call_update_output(self, bufs, input, weight, bias):
-        backend = type2backend[type(input)]
+        backend = type2backend[input.type()]
         bufs.extend([input.new(), input.new()])
         output = input.new(*self._output_size(input, weight))
         kernel_size = weight.size()[2:]
@@ -272,7 +272,7 @@ def make_update_output(fn):
 
 def make_grad_input(fn):
     def call_grad_input(self, bufs, input, weight, grad_output):
-        backend = type2backend[type(input)]
+        backend = type2backend[input.type()]
         grad_input = input.new().resize_as_(input)
         kernel_size = weight.size()[2:]
         args = parse_arguments(self, fn.arguments[5:], bufs, kernel_size)
@@ -284,7 +284,7 @@ def make_grad_input(fn):
 
 def make_grad_params(fn):
     def call_grad_params(self, bufs, input, weight, bias, grad_output):
-        backend = type2backend[type(input)]
+        backend = type2backend[input.type()]
         grad_weight = weight.new().resize_as_(weight).zero_()
         grad_bias = None
         if bias is not None and self.needs_input_grad[2]:

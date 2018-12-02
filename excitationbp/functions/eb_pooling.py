@@ -21,7 +21,7 @@ class EBMaxPool1d(Function):
                              .format(input.dim()))
 
         input2d = input.unsqueeze(2)    # size = N*C*1*L
-        backend = type2backend[type(input)]
+        backend = type2backend[input.type()]
         indices, output = input2d.new().long(), input2d.new()
         backend.SpatialDilatedMaxPooling_updateOutput(backend.library_state,
                                                       input2d, output, indices,
@@ -53,7 +53,7 @@ class EBMaxPool1d(Function):
             input.data = input.data - input.data.min()
 
         input2d = input.unsqueeze(2)
-        normbackend = type2backend[type(input)]
+        normbackend = type2backend[input.type()]
         normindex, normfactor = input2d.new().long(), input2d.new()
         normbackend.SpatialDilatedMaxPooling_updateOutput(backend.library_state,
                                                       input2d, normfactor, normindex,
@@ -71,7 +71,7 @@ class EBMaxPool1d(Function):
         indices2d = indices.unsqueeze(2)
         grad_output2d = grad_output.unsqueeze(2)
         grad_input = grad_output2d.new()
-        backend = type2backend[type(input)]
+        backend = type2backend[input.type()]
         backend.SpatialDilatedMaxPooling_updateGradInput(backend.library_state,
                                                          input2d, grad_output2d, grad_input, indices2d,
                                                          self.kernel_size, 1,
@@ -95,7 +95,7 @@ class EBMaxPool2d(Function):
         self.ceil_mode = ceil_mode
 
     def forward(self, input):
-        backend = type2backend[type(input)]
+        backend = type2backend[input.type()]
         indices, output = input.new().long(), input.new()
         backend.SpatialDilatedMaxPooling_updateOutput(backend.library_state,
                                                       input, output, indices,
@@ -123,7 +123,7 @@ class EBMaxPool2d(Function):
         if input.data.min() < 0:
             input.data = input.data - input.data.min()
 
-        normbackend = type2backend[type(input)]
+        normbackend = type2backend[input.type()]
         normindex, normfactor = input.new().long(), input.new()
         normbackend.SpatialDilatedMaxPooling_updateOutput(backend.library_state,
                                                       input, normfactor, normindex,
@@ -135,7 +135,7 @@ class EBMaxPool2d(Function):
         grad_output /= normfactor + 1e-10
         ### stop EB-SPECIFIC CODE ###
         grad_input = grad_output.new()
-        backend = type2backend[type(input)]
+        backend = type2backend[input.type()]
         backend.SpatialDilatedMaxPooling_updateGradInput(backend.library_state,
                                                          input, grad_output, grad_input, indices,
                                                          self.kernel_size[1], self.kernel_size[0],
@@ -158,7 +158,7 @@ class EBMaxPool3d(Function):
         self.ceil_mode = ceil_mode
 
     def forward(self, input):
-        backend = type2backend[type(input)]
+        backend = type2backend[input.type()]
         indices, output = input.new().long(), input.new()
         backend.VolumetricDilatedMaxPooling_updateOutput(backend.library_state,
                                                          input, output, indices,
@@ -186,7 +186,7 @@ class EBMaxPool3d(Function):
         if input.data.min() < 0:
             input.data = input.data - input.data.min()
 
-        normbackend = type2backend[type(input)]
+        normbackend = type2backend[input.type()]
         normindex, normfactor = input.new().long(), input.new()
         normbackend.VolumetricDilatedMaxPooling_updateOutput(backend.library_state,
                                                          input, normfactor, normindex,
@@ -198,7 +198,7 @@ class EBMaxPool3d(Function):
         grad_output /= normfactor + 1e-10
         ### stop EB-SPECIFIC CODE ###
         grad_input = grad_output.new()
-        backend = type2backend[type(input)]
+        backend = type2backend[input.type()]
         backend.VolumetricDilatedMaxPooling_updateGradInput(backend.library_state,
                                                             input, grad_output, grad_input, indices,
                                                             self.kernel_size[0], self.kernel_size[
@@ -218,7 +218,7 @@ class EBMaxUnpool2d(Function):
 
     def forward(self, input, indices):
         self.save_for_backward(input, indices)
-        self._backend = type2backend[type(input)]
+        self._backend = type2backend[input.type()]
         output = input.new()
         self._backend.SpatialMaxUnpooling_updateOutput(
             self._backend.library_state, input, output, indices,
@@ -255,7 +255,7 @@ class EBMaxUnpool3d(Function):
 
     def forward(self, input, indices):
         self.save_for_backward(input, indices)
-        self._backend = type2backend[type(input)]
+        self._backend = type2backend[input.type()]
         output = input.new()
         self._backend.VolumetricMaxUnpooling_updateOutput(
             self._backend.library_state, input, output, indices,
@@ -331,7 +331,7 @@ class EBFractionalMaxPool2d(Function):
 
         indices = input.new().long()
         output = input.new()
-        self._backend = type2backend[type(input)]
+        self._backend = type2backend[input.type()]
         self._backend.SpatialFractionalMaxPooling_updateOutput(
             self._backend.library_state,
             input,
@@ -400,7 +400,7 @@ class EBAvgPool2d(Function):
         self.count_include_pad = count_include_pad
 
     def forward(self, input):
-        backend = type2backend[type(input)]
+        backend = type2backend[input.type()]
         output = input.new()
         # can avoid this with cudnn
         self.save_for_backward(input)
@@ -414,7 +414,7 @@ class EBAvgPool2d(Function):
         return output
 
     def backward(self, grad_output):
-        backend = type2backend[type(grad_output)]
+        backend = type2backend[type(grad_output).__name__]
         input, = self.saved_tensors
 
         ### start EB-SPECIFIC CODE ###
@@ -422,7 +422,7 @@ class EBAvgPool2d(Function):
             input.data = input.data - input.data.min()
 
         normfactor = input.new()
-        normbackend = type2backend[type(input)]
+        normbackend = type2backend[input.type()]
         normbackend.SpatialAveragePooling_updateOutput(
             backend.library_state,
             input, normfactor,
@@ -452,7 +452,7 @@ class EBAvgPool3d(Function):
         self.stride = _triple(stride if stride is not None else kernel_size)
 
     def forward(self, input):
-        backend = type2backend[type(input)]
+        backend = type2backend[input.type()]
         output = input.new()
         # can avoid this with cudnn
         self.save_for_backward(input)
@@ -463,7 +463,7 @@ class EBAvgPool3d(Function):
         return output
 
     def backward(self, grad_output):
-        backend = type2backend[type(grad_output)]
+        backend = type2backend[type(grad_output).__name__]
         input, = self.saved_tensors
 
         ### start EB-SPECIFIC CODE ###
@@ -471,7 +471,7 @@ class EBAvgPool3d(Function):
             input.data = input.data - input.data.min()
 
         normfactor = input.new()
-        normbackend = type2backend[type(input)]
+        normbackend = type2backend[input.type()]
         normbackend.VolumetricAveragePooling_updateOutput(backend.library_state,
                                                       input, normfactor,
                                                       self.kernel_size[0], self.kernel_size[2], self.kernel_size[1],
@@ -500,7 +500,7 @@ class EBAdaptiveMaxPool1d(Function):
                              .format(input.dim()))
 
         input2d = input.unsqueeze(2)    # size = N*C*1*L
-        backend = type2backend[type(input)]
+        backend = type2backend[input.type()]
         indices, output = input2d.new().long(), input2d.new()
         backend.SpatialAdaptiveMaxPooling_updateOutput(backend.library_state,
                                                        input2d, output, indices,
@@ -528,7 +528,7 @@ class EBAdaptiveMaxPool1d(Function):
 
         input2d = input.unsqueeze(2) 
         normindices, normfactor = input.new().long(), input.new()
-        normbackend = type2backend[type(input)]
+        normbackend = type2backend[input.type()]
         normbackend.SpatialAdaptiveMaxPooling_updateOutput(backend.library_state,
                                                        input2d, normfactor, normindices,
                                                        self.output_size[0], 1)
@@ -540,7 +540,7 @@ class EBAdaptiveMaxPool1d(Function):
         indices2d = indices.unsqueeze(2)
         grad_output2d = grad_output.unsqueeze(2)
         grad_input = grad_output2d.new()
-        backend = type2backend[type(input)]
+        backend = type2backend[input.type()]
         backend.SpatialAdaptiveMaxPooling_updateGradInput(backend.library_state,
                                                           input2d, grad_output2d, grad_input, indices2d)
         grad_input = grad_input.squeeze(2)
@@ -554,7 +554,7 @@ class EBAdaptiveMaxPool2d(Function):
         self.return_indices = return_indices
 
     def forward(self, input):
-        backend = type2backend[type(input)]
+        backend = type2backend[input.type()]
         indices, output = input.new().long(), input.new()
         backend.SpatialAdaptiveMaxPooling_updateOutput(backend.library_state,
                                                        input, output, indices,
@@ -579,7 +579,7 @@ class EBAdaptiveMaxPool2d(Function):
             input.data = input.data - input.data.min()
 
         normindices, normfactor = input.new().long(), input.new()
-        normbackend = type2backend[type(input)]
+        normbackend = type2backend[input.type()]
         normbackend.SpatialAdaptiveMaxPooling_updateOutput(backend.library_state,
                                                        input, normfactor, normindices,
                                                        self.output_size[1], self.output_size[0])
@@ -587,7 +587,7 @@ class EBAdaptiveMaxPool2d(Function):
         grad_output /= normfactor + 1e-10
         ### stop EB-SPECIFIC CODE ###       
         grad_input = grad_output.new()
-        backend = type2backend[type(input)]
+        backend = type2backend[input.type()]
         backend.SpatialAdaptiveMaxPooling_updateGradInput(backend.library_state,
                                                           input, grad_output, grad_input, indices)
         return grad_input
@@ -604,7 +604,7 @@ class EBAdaptiveAvgPool1d(Function):
                              .format(input.dim()))
 
         input2d = input.unsqueeze(2)    # size = N*C*1*L
-        backend = type2backend[type(input)]
+        backend = type2backend[input.type()]
         output = input2d.new()
         self.save_for_backward(input)
         backend.SpatialAdaptiveAveragePooling_updateOutput(
@@ -615,7 +615,7 @@ class EBAdaptiveAvgPool1d(Function):
         return output
 
     def backward(self, grad_output):
-        backend = type2backend[type(grad_output)]
+        backend = type2backend[type(grad_output).__name__]
         input, = self.saved_tensors
 
         ### start EB-SPECIFIC CODE ###
@@ -624,7 +624,7 @@ class EBAdaptiveAvgPool1d(Function):
 
         input2d = input.unsqueeze(2)
         normfactor = input2d.new()
-        normbackend = type2backend[type(input)]
+        normbackend = type2backend[input.type()]
         normbackend.SpatialAdaptiveAveragePooling_updateOutput(
             backend.library_state,
             input2d, normfactor,
@@ -649,7 +649,7 @@ class EBAdaptiveAvgPool2d(Function):
         self.output_size = _pair(output_size)
 
     def forward(self, input):
-        backend = type2backend[type(input)]
+        backend = type2backend[input.type()]
         output = input.new()
         self.save_for_backward(input)
         backend.SpatialAdaptiveAveragePooling_updateOutput(
@@ -659,14 +659,14 @@ class EBAdaptiveAvgPool2d(Function):
         return output
 
     def backward(self, grad_output):
-        backend = type2backend[type(grad_output)]
+        backend = type2backend[type(grad_output).__name__]
         input, = self.saved_tensors
         ### start EB-SPECIFIC CODE ###
         if input.data.min() < 0:
             input.data = input.data - input.data.min()
 
         normfactor = input.new()
-        normbackend = type2backend[type(input)]
+        normbackend = type2backend[input.type()]
         normbackend.SpatialAdaptiveAveragePooling_updateOutput(
             backend.library_state,
             input, normfactor,
@@ -683,4 +683,4 @@ def eb_avg_pool2d(input, kernel_size, stride=None, padding=0, ceil_mode=False, c
     return EBAvgPool2d(kernel_size, stride, padding, ceil_mode, count_include_pad)(input)
 
 def eb_max_pool2d(kernel_size, stride=None, padding=0, dilation=1, return_indices=False, ceil_mode=False):
-    return EBMaxPool2d(kernel_size, stride, padding, dilation,return_indices, ceil_mode)(input)
+    return EBMaxPool2d(kernel_size, stride, padding, dilation, return_indices, ceil_mode)(input)

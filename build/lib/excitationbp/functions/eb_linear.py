@@ -3,46 +3,42 @@ from torch.autograd import Function
 from torch.autograd import Variable
 
 class EBLinear(Function):
-    # Note that both forward and backward are @staticmethods
     @staticmethod
-    # bias is an optional argument
     def forward(ctx, input, weight, bias=None):
         ctx.save_for_backward(input, weight, bias)
-        output = input.mm(weight.t())
+        output = input.new(input.size(0), weight.size(0))
+        output.addmm_(0, 1, input, weight.t())
         if bias is not None:
-            output += bias.unsqueeze(0).expand_as(output)
+            ctx.add_buffer = input.new(input.size(0)).fill_(1)
+            output.addr_(ctx.add_buffer, bias)
         return output
 
-    # This function has only a single output, so it gets only one gradient
     @staticmethod
     def backward(ctx, grad_output):
-        input, weight, bias = ctx.saved_variables
+        input, weight, bias = ctx.saved_tensors
 
         ### start EB-SPECIFIC CODE  ###
-        # print("this is a {} linear layer ({})"
-        #       .format('pos' if torch.use_pos_weights else 'neg', grad_output.sum().data[0]))
-        weight = weight.clamp(min=0) if torch.use_pos_weights else weight.clamp(max=0).abs()
+        if torch.use_pos_weights:
+            weight = weight.clamp(min=0) 
+        else:
+            weight = weight.clamp(max=0).abs()
 
-        input.data = input.data - input.data.min() if input.data.min() < 0 else input.data
-        grad_output /= input.mm(weight.t()).abs() + 1e-10 # normalize
+        if input.data.min() < 0:
+            input.data = input.data - input.data.min()
+        grad_output /= input.mm(weight.t()).abs() + 1e-10
         ### stop EB-SPECIFIC CODE  ###
 
+
         grad_input = grad_weight = grad_bias = None
-
-        # These needs_input_grad checks are optional and there only to
-        # improve efficiency. If you want to make your code simpler, you can
-        # skip them. Returning gradients for inputs that don't require it is
-        # not an error.
         if ctx.needs_input_grad[0]:
-            grad_input = grad_output.mm(weight)
-            ### start EB-SPECIFIC CODE  ###
+            grad_input = torch.mm(grad_output, weight)
             grad_input *= input
-            ### stop EB-SPECIFIC CODE  ###
-
         if ctx.needs_input_grad[1]:
-            grad_weight = grad_output.t().mm(input)
+            grad_weight = torch.mm(grad_output.t(), input)
         if bias is not None and ctx.needs_input_grad[2]:
-            grad_bias = grad_output.sum(0).squeeze(0)
+            grad_bias = torch.mv(grad_output.t(), Variable(ctx.add_buffer))
 
-
-        return grad_input, grad_weight, grad_bias
+        if bias is not None:
+            return grad_input, grad_weight, grad_bias
+        else:
+            return grad_input, grad_weight
