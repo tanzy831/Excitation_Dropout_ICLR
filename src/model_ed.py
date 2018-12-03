@@ -56,19 +56,20 @@ class CNN_2_EDropout(nn.Module):
         self.model2 = latterModel(copy.deepcopy(self.fc2), copy.deepcopy(self.fc3))
         eb.use_eb(True, verbose=False)
         peb_list = []
-        data = h5.clone()
-        for i in range(self.batch_size):
-            prob_outputs = Variable(torch.zeros(1, 10)).to(device)
-            prob_outputs.data[:, label[i]] += 1
+        if self.training:
+            data = h5.clone()
+            for i in range(self.batch_size):
+                prob_outputs = Variable(torch.zeros(1, 10)).to(device)
+                prob_outputs.data[:, label[i]] += 1
 
-            prob_inputs = eb.excitation_backprop(
-                self.model2, data[i:i + 1, :], prob_outputs, 
-                contrastive=False, target_layer=0)
-            peb_list.append(prob_inputs)
+                prob_inputs = eb.excitation_backprop(
+                    self.model2, data[i:i + 1, :], prob_outputs, 
+                    contrastive=False, target_layer=0)
+                peb_list.append(prob_inputs)
         
-        pebs = torch.cat(peb_list, dim=0) # calc peb
-        mask = DropoutMask.mask(pebs) # calc mask
-        eb.use_eb(False, verbose=False)
+            pebs = torch.cat(peb_list, dim=0) # calc peb
+            mask = DropoutMask.mask(pebs) # calc mask
+            eb.use_eb(False, verbose=False)
 
         self.ed.train = self.training  # ugly code!
         h_ed = self.ed(h5)

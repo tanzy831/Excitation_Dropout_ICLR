@@ -44,6 +44,7 @@ criterion = nn.CrossEntropyLoss()
 
 iterations = 0
 for e in range(EPOCH):
+    model.train()
     epoch_loss = 0
     e_start = timeit.default_timer()
     batch_idx = 0
@@ -69,10 +70,11 @@ for e in range(EPOCH):
     e_end = timeit.default_timer()
 
     # validation
+    model.eval()
     correct = 0
     for data, label in validate_loader:
         data, label = data.to(device).float(), label.to(device).long()
-        output = model(data)
+        output = model(data, label)
         result = output.max(1)[1]
         correct += label.eq(result).sum()
     correct = correct.float().cpu()
