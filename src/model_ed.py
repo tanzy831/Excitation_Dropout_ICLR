@@ -56,6 +56,7 @@ class CNN_2_EDropout(nn.Module):
         model2 = latterModel(copy.deepcopy(self.fc2), copy.deepcopy(self.fc3))
         eb.use_eb(True, verbose=False)
         peb_list = []
+        mask = None
         if self.training:
             data = h5.clone()
             for i in range(self.batch_size):
@@ -72,6 +73,7 @@ class CNN_2_EDropout(nn.Module):
             eb.use_eb(False, verbose=False)
 
         self.ed.train = self.training  # ugly code!
+        self.ed.mask =  mask
         h_ed = self.ed(h5)
 
         h6 = F.relu(self.fc2(h_ed))
