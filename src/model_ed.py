@@ -53,7 +53,7 @@ class CNN_2_EDropout(nn.Module):
         h4 = self.flatten(h3)
         h5 = F.relu(self.fc1(h4))
 
-        self.model2 = latterModel(copy.deepcopy(self.fc2), copy.deepcopy(self.fc3))
+        model2 = latterModel(copy.deepcopy(self.fc2), copy.deepcopy(self.fc3))
         eb.use_eb(True, verbose=False)
         peb_list = []
         if self.training:
@@ -63,7 +63,7 @@ class CNN_2_EDropout(nn.Module):
                 prob_outputs.data[:, label[i]] += 1
 
                 prob_inputs = eb.excitation_backprop(
-                    self.model2, data[i:i + 1, :], prob_outputs, 
+                    model2, data[i:i + 1, :], prob_outputs, 
                     contrastive=False, target_layer=0)
                 peb_list.append(prob_inputs)
         
