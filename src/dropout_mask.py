@@ -11,7 +11,7 @@ class DropoutMask():
         retain_p = DropoutMask.calc_p_matrix(pebs, P)
         # calc mask with bernoulli distribution
         mask = Bernoulli(retain_p).sample()
-        return mask
+        return mask, retain_p
 
     @staticmethod
     def calc_p_matrix(pebs, P):

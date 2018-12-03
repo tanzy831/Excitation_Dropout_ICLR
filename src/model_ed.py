@@ -57,6 +57,7 @@ class CNN_2_EDropout(nn.Module):
         eb.use_eb(True, verbose=False)
         peb_list = []
         mask = None
+        retain_p = None
         if self.training:
             data = h5.clone()
             for i in range(self.batch_size):
@@ -69,11 +70,12 @@ class CNN_2_EDropout(nn.Module):
                 peb_list.append(prob_inputs)
         
             pebs = torch.cat(peb_list, dim=0) # calc peb
-            mask = DropoutMask.mask(pebs) # calc mask
+            mask, retain_p = DropoutMask.mask(pebs) # calc mask
             eb.use_eb(False, verbose=False)
 
         self.ed.train = self.training  # ugly code!
         self.ed.mask =  mask
+        self.ed.retain_p = retain_p
         h_ed = self.ed(h5)
 
         h6 = F.relu(self.fc2(h_ed))
