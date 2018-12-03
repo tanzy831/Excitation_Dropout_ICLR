@@ -19,6 +19,6 @@ class DropoutMask():
         ones = torch.ones(batch_size, num_neuron).to(device)
 
         upper = torch.mul(ones * (1 - P) * (num_neuron - 1), pebs)
-        lower = torch.mul(((ones * num_neuron) - 1), pebs) + P
+        lower = torch.mul(((ones * (1 - P) * num_neuron) - 1), pebs) + P
         result = 1 - torch.div(upper, lower)
         return result
