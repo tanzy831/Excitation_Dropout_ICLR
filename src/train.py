@@ -20,7 +20,7 @@ DOWNLOAD_CIFAR = True
 EPOCH = 300
 BATCH_SIZE = 100
 VALID_BATCH_SIZE = 100
-model = CNN_2_EDropout()
+model = CNN_2_EDropout(BATCH_SIZE)
 
 model_save_path = Path('./' + MODEL_SAVE_DIRECTORY)
 if not (model_save_path.exists() and model_save_path.is_dir()):
@@ -54,28 +54,7 @@ for e in range(EPOCH):
         torch.cuda.empty_cache()
         data, label = data.to(device).float(), label.to(device).long()
         Optimizer.zero_grad()
-        output = model.forward(data, mask=None, non_eb=True)
-
-        # start excitation backprop
-        eb.use_eb(True, verbose=False)
-
-        peb_list = []
-        for i in range(BATCH_SIZE):
-            prob_outputs = Variable(torch.zeros(1, 10)).to(device)
-            prob_outputs.data[:, label[i]] += 1
-
-            prob_inputs = eb.excitation_backprop(
-                model, data[i:i + 1, :, :, :], prob_outputs, 
-                contrastive=False, target_layer=4)
-            peb_list.append(prob_inputs)
-        
-        pebs = torch.cat(peb_list, dim=0) # calc peb
-        mask = DropoutMask.mask(pebs) # calc mask
-        output = model.forward(data, mask, non_eb=True)
-
-        eb.use_eb(False, verbose=False)
-        # end excitation backprop
-
+        output = model.forward(data, label)
         loss = criterion(output, label)
         l = loss.item()
         loss.backward()

@@ -1,13 +1,29 @@
-import torch.nn as nn
 import torch
+import torch.nn as nn
 import torch.nn.functional as F
-# from ...Exictation_Dropout_ICLR.baseline.model import Flatten
 from model import Flatten
-import time
+from EDropout import *
+import excitationbp as eb
+import copy
+from torch.autograd import Variable
+from dropout_mask import DropoutMask
+
+device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
+
+class latterModel(nn.Module):
+    def __init__(self, f1, f2):
+        super(latterModel, self).__init__()
+        self.fc1 = f1
+        self.fc2 = f2
+    
+    def forward(self, x):
+        h6 = F.relu(self.fc1(x))
+        y = self.fc2(h6)
+        return y
 
 
 class CNN_2_EDropout(nn.Module):
-    def __init__(self):
+    def __init__(self, batch_size):
         super(CNN_2_EDropout, self).__init__()
         self.cnn1 = nn.Conv2d(in_channels=3, out_channels=96,
                               kernel_size=5, padding=1, stride=1)
@@ -25,34 +41,39 @@ class CNN_2_EDropout(nn.Module):
         self.fc2 = nn.Linear(in_features=2048, out_features=2048)
         self.fc3 = nn.Linear(in_features=2048, out_features=10)
 
-        self.middle = None
+        self.ed = EDropout(p=0.5, train=self.training, inplace=True)
 
-    def forward(self, x, mask=None, non_eb=False):
-        if mask is None:
-            h1 = self.maxpool1(F.relu(self.cnn1(x)))
-            h2 = self.maxpool2(F.relu(self.cnn2(h1)))
-            h3 = self.maxpool3(F.relu(self.cnn3(h2)))
+        self.batch_size = batch_size
 
-            h4 = self.flatten(h3)
 
-            h5 = F.relu(self.fc1(h4))
-            if non_eb:
-                self.middle = h5
-        else:
-            assert self.middle.shape == mask.shape
-            h5 = self.middle * mask
-        h6 = F.relu(self.fc2(h5))
+    def forward(self, x, label):
+        h1 = self.maxpool1(F.relu(self.cnn1(x)))
+        h2 = self.maxpool2(F.relu(self.cnn2(h1)))
+        h3 = self.maxpool3(F.relu(self.cnn3(h2)))
+        h4 = self.flatten(h3)
+        h5 = F.relu(self.fc1(h4))
+
+        self.model2 = latterModel(copy.deepcopy(self.fc2), copy.deepcopy(self.fc3))
+        eb.use_eb(True, verbose=False)
+        peb_list = []
+        data = h5.clone()
+        for i in range(self.batch_size):
+            prob_outputs = Variable(torch.zeros(1, 10)).to(device)
+            prob_outputs.data[:, label[i]] += 1
+
+            prob_inputs = eb.excitation_backprop(
+                self.model2, data[i:i + 1, :], prob_outputs, 
+                contrastive=False, target_layer=0)
+            peb_list.append(prob_inputs)
+        
+        pebs = torch.cat(peb_list, dim=0) # calc peb
+        mask = DropoutMask.mask(pebs) # calc mask
+        eb.use_eb(False, verbose=False)
+
+        self.ed.train = self.training  # ugly code!
+        h_ed = self.ed(h5)
+
+        h6 = F.relu(self.fc2(h_ed))
         h7 = self.fc3(h6)
 
-        if mask is not None and non_eb:
-            self.middle = None
-
         return h7
-
-# class EDLinear(nn.Linear):
-#     def __init__(self, in_features, out_features, bias=True):
-#         super(EDLinear, self).__init__(in_features, out_features, bias)
-    
-#     def forward(self, input):
-#         output = super(EDLinear, self).forward(input)
-#         return output

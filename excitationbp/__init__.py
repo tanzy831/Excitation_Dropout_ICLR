@@ -5,7 +5,6 @@ from . import functions
 from .functions.eb_linear import *
 from .functions.eb_convNd import *
 from .functions.eb_pooling import *
-from .functions.EDropout import *
 
 from .utils import *
 import copy
@@ -33,7 +32,6 @@ def use_eb(use_eb, verbose=True):
 
         if verbose: print("\t->replacing torch.nn.functional.linear with eb_linear...")
         torch.nn.functional.linear = EBLinear.apply
-        torch.nn.functional.dropout = Dropout.apply
 
         # if verbose: print("\t->replacing torch.nn.functional.conv{1,2,3}d with eb_conv{1,2,3}d...")
         # torch.nn.functional.conv1d = eb_conv1d
@@ -51,7 +49,6 @@ def use_eb(use_eb, verbose=True):
 
         if verbose: print("\t->restoring torch.nn.backends.thnn.backend.Linear...")
         torch.nn.functional.linear = real_fs[0]
-        torch.nn.functional.dropout = real_fs[1]
 
         # if verbose: print("\t->restoring torch.nn.functional.conv{1,2,3}d...")
         # torch.nn.functional.conv1d = real_fs[1]

@@ -4,10 +4,10 @@ from itertools import repeat
 
 # modifed from https://github.com/tylergenter/pytorch/blob/42459c2544bc6c2e37c3459caaeca7c9eb1a8906/torch/nn/_functions/dropout.py
 
-class Dropout(InplaceFunction):
+class EDropout(InplaceFunction):
 
     def __init__(self, p=0.5, train=False, inplace=False):
-        super(Dropout, self).__init__()
+        super(EDropout, self).__init__()
         if p < 0 or p > 1:
             raise ValueError("dropout probability has to be between 0 and 1, "
                              "but got {}".format(p))
@@ -40,10 +40,3 @@ class Dropout(InplaceFunction):
             return grad_output.mul(self.noise)
         else:
             return grad_output
-
-
-class FeatureDropout(Dropout):
-
-    def _make_noise(self, input):
-        return input.new().resize_(input.size(0), input.size(1),
-                                   *repeat(1, input.dim() - 2))

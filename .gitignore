@@ -13,3 +13,4 @@ baseline/logs/
 .ipynb_checkpoints/
 data/
 figures/
+*.ipynb
