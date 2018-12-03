@@ -48,3 +48,11 @@ class CNN_2_EDropout(nn.Module):
             self.middle = None
 
         return h7
+
+# class EDLinear(nn.Linear):
+#     def __init__(self, in_features, out_features, bias=True):
+#         super(EDLinear, self).__init__(in_features, out_features, bias)
+    
+#     def forward(self, input):
+#         output = super(EDLinear, self).forward(input)
+#         return output
