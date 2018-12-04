@@ -13,6 +13,7 @@ class EDropout(InplaceFunction):
         self.inplace = inplace
         self.mask = None
         self.retain_p = None
+        self.entropy_list = []
 
     def _make_noise(self, input):
         return input.new().resize_as_(input)

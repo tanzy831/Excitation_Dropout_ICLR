@@ -67,6 +67,9 @@ for e in range(EPOCH):
         # log batch loss
         logger.scalar_summary('batch_loss', l, iterations)
 
+        # log peb entropy change
+        logger.scalar_summary('pen_entropy', model.ed.entropy_list[iterations], iterations)
+
     e_end = timeit.default_timer()
 
     # validation
