@@ -14,6 +14,7 @@ class EDropout(InplaceFunction):
         self.mask = None
         self.retain_p = None
         self.entropy_list = []
+        self.peek_peb = 0.0
 
     def _make_noise(self, input):
         return input.new().resize_as_(input)

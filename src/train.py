@@ -67,8 +67,11 @@ for e in range(EPOCH):
         # log batch loss
         logger.scalar_summary('batch_loss', l, iterations)
 
-        # log peb entropy change
-        logger.scalar_summary('pen_entropy', model.ed.entropy_list[iterations], iterations)
+        # log peb entropys 
+        logger.scalar_summary('peb_entropy', model.ed.entropy_list[iterations - 1], iterations)
+
+        # log peek peb
+        logger.scalar_summary('peek_peb', model.ed.peek_peb, iterations)
 
     e_end = timeit.default_timer()
 
@@ -77,7 +80,7 @@ for e in range(EPOCH):
     correct = 0
     for data, label in validate_loader:
         data, label = data.to(device).float(), label.to(device).long()
-        output = model(data, label)
+        output = model.forward(data, label)
         result = output.max(1)[1]
         correct += label.eq(result).sum()
     correct = correct.float().cpu()
