@@ -68,7 +68,7 @@ for e in range(EPOCH):
         logger.scalar_summary('batch_loss', l, iterations)
 
         # log peb entropys 
-        logger.scalar_summary('peb_entropy', model.ed.entropy_list[iterations - 1], iterations)
+        logger.scalar_summary('peb_entropy', model.ed.peb_entropy, iterations)
 
         # log peek peb
         logger.scalar_summary('peek_peb', model.ed.peek_peb, iterations)
