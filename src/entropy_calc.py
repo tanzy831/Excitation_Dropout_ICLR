@@ -6,8 +6,9 @@ class Entropy_Calc():
 
     @staticmethod
     def peb_entropy_calc(pebs):
-        pebs_list = pebs[0]
-        #pebs_list = torch.reshape(pebs, (-1, ))
+        #pebs_list = pebs[0]
+        # use 5 images combinations to calcualte average peb entropy 
+        pebs_list = torch.cat((pebs[0], pebs[1], pebs[2], pebs[3], pebs[4]), dim=0)
         max_val = torch.max(pebs_list)
         min_val = torch.min(pebs_list)
         unit = (max_val - min_val) / 999

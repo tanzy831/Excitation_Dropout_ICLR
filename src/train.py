@@ -67,12 +67,6 @@ for e in range(EPOCH):
         # log batch loss
         logger.scalar_summary('batch_loss', l, iterations)
 
-        # log peb entropys 
-        logger.scalar_summary('peb_entropy', model.ed.peb_entropy, iterations)
-
-        # log peek peb
-        logger.scalar_summary('peek_peb', model.ed.peek_peb, iterations)
-
     e_end = timeit.default_timer()
 
     # validation
@@ -101,6 +95,8 @@ for e in range(EPOCH):
     # log to tensorboard
     logger.scalar_summary('LPS', lps, e + 1)
     logger.scalar_summary('Accuracy', accuracy, e + 1)
+    logger.scalar_summary('peb_entropy', model.ed.peb_entropy, iterations)
+    logger.scalar_summary('peek_peb', model.ed.peek_peb, iterations)
     # Log values and gradients of the parameters (histogram summary)
     for tag, value in model.named_parameters():
         tag = tag.replace('.', '/')
