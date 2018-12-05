@@ -95,8 +95,8 @@ for e in range(EPOCH):
     # log to tensorboard
     logger.scalar_summary('LPS', lps, e + 1)
     logger.scalar_summary('Accuracy', accuracy, e + 1)
-    logger.scalar_summary('peb_entropy', model.ed.peb_entropy, iterations)
-    logger.scalar_summary('peek_peb', model.ed.peek_peb, iterations)
+    logger.scalar_summary('peb_entropy', model.ed.peb_entropy, e + 1)
+    logger.scalar_summary('peek_peb', model.ed.peek_peb, e + 1)
     # Log values and gradients of the parameters (histogram summary)
     for tag, value in model.named_parameters():
         tag = tag.replace('.', '/')
