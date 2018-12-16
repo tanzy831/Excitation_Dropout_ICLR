@@ -7,6 +7,7 @@ import excitationbp as eb
 import copy
 from torch.autograd import Variable
 from dropout_mask import DropoutMask
+from entropy_calc import Entropy_Calc
 
 device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 
@@ -71,6 +72,9 @@ class CNN_2_EDropout(nn.Module):
         
             pebs = torch.cat(peb_list, dim=0) # calc peb
             mask, retain_p = DropoutMask.mask(pebs) # calc mask
+            peb_entropy = Entropy_Calc.peb_entropy_calc(pebs) # calc peb entropy val
+            self.ed.peb_entropy = peb_entropy
+            self.ed.peek_peb = torch.max(pebs) # update peek peb
             eb.use_eb(False, verbose=False)
 
         self.ed.train = self.training  # ugly code!
